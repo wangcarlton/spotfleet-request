@@ -78,10 +78,21 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2SpotFleetTaggingRole-policy-
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole"
 }
 
+data "template_cloudinit_config" "config" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = data.template_file.user_data.rendered
+  }
+}
+
 resource "aws_spot_fleet_request" "spotfleet_request" {
   iam_fleet_role      = aws_iam_role.spotfleet_role.arn
   allocation_strategy = "lowestPrice"
   target_capacity     = 1
+  terminate_instances_with_expiration = true
 
   launch_specification {
     instance_type            = var.instance_type
@@ -89,7 +100,7 @@ resource "aws_spot_fleet_request" "spotfleet_request" {
     key_name                 = var.key_name
     iam_instance_profile_arn = aws_iam_instance_profile.instance_profile.arn
     subnet_id                = element(module.vpc.public_subnets,0)
-    user_data                = data.template_file.user_data.rendered
+    user_data                = data.template_cloudinit_config.config.rendered
     vpc_security_group_ids   = [aws_security_group.asg_sg.id]
     tags = {
       Name = "spot-fleet"

@@ -35,11 +35,11 @@ variable "public_subnets" {
 }
 
 variable "instance_type" {
-  default     = "t2.medium"
+  default     = "t2.small"
   description = "instance_type"
 }
 
 variable "aws_ami" {
-  default     = "ami-02a599eb01e3b3c5b"
+  default     = "ami-08fdde86b93accf1c"
   description = "aws_ami"
 }
