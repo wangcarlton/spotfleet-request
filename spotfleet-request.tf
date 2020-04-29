@@ -88,42 +88,42 @@ data "template_cloudinit_config" "config" {
   }
 }
 
-resource "aws_spot_fleet_request" "spotfleet_request" {
-  iam_fleet_role      = aws_iam_role.spotfleet_role.arn
-  allocation_strategy = "lowestPrice"
-  target_capacity     = 1
-  terminate_instances_with_expiration = true
+# resource "aws_spot_fleet_request" "spotfleet_request" {
+#   iam_fleet_role      = aws_iam_role.spotfleet_role.arn
+#   allocation_strategy = "lowestPrice"
+#   target_capaci           ty     = 1
+#   terminate_instances_with_expiration = true
 
-  launch_specification {
-    instance_type            = var.instance_type
-    ami                      = var.aws_ami
-    key_name                 = var.key_name
-    iam_instance_profile_arn = aws_iam_instance_profile.instance_profile.arn
-    subnet_id                = element(module.vpc.public_subnets,0)
-    user_data                = data.template_cloudinit_config.config.rendered
-    vpc_security_group_ids   = [aws_security_group.asg_sg.id]
-    tags = {
-      Name = "spot-fleet"
-    }
-  }
-}
-
-# resource "aws_spot_instance_request" "ec2-instance" {
-#   ami                   = var.aws_ami
-#   instance_type               = var.instance_type
-#   security_groups             = [aws_security_group.asg_sg.id]
-#   user_data                   = data.template_file.user_data.rendered
-#   iam_instance_profile        = aws_iam_instance_profile.instance_profile.id
-#   subnet_id                   = element(module.vpc.public_subnets,0)
-#   key_name                    = var.key_name
-#   associate_public_ip_address = true
-#   wait_for_fulfillment = true
-#   spot_type = "one-time"
-
-#   lifecycle {
-#     create_before_destroy = true
+#   launch_specification {
+#     instance_type            = var.instance_type
+#     ami                      = var.aws_ami
+#     key_name                 = var.key_name
+#     iam_instance_profile_arn = aws_iam_instance_profile.instance_profile.arn
+#     subnet_id                = element(module.vpc.public_subnets,0)
+#     user_data                = data.template_cloudinit_config.config.rendered
+#     vpc_security_group_ids   = [aws_security_group.asg_sg.id]
+#     tags = {
+#       Name = "spot-fleet"
+#     }
 #   }
 # }
+
+resource "aws_spot_instance_request" "ec2-instance" {
+  ami                   = var.aws_ami
+  instance_type               = var.instance_type
+  security_groups             = [aws_security_group.asg_sg.id]
+  user_data                   = data.template_file.user_data.rendered
+  iam_instance_profile        = aws_iam_instance_profile.instance_profile.id
+  subnet_id                   = element(module.vpc.public_subnets,0)
+  key_name                    = var.key_name
+  associate_public_ip_address = true
+  wait_for_fulfillment = true
+  spot_type = "one-time"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
 data "template_file" "user_data" {
   template = file("${path.module}/user_data.sh")

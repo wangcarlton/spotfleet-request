@@ -41,6 +41,8 @@ app.get('/', (req, res) => res.send('Test for WAF!'))
 
 app.listen(port, () => console.log('Sever istening at http://localhost:3000'))" >> index.js
 
+node index.js
+
 EOF
 
 chown ec2-user:ec2-user /tmp/subscript.sh && chmod a+x /tmp/subscript.sh
